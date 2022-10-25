@@ -85,12 +85,7 @@ service Auth {
       delete: "/user/{ids}"
     };
   }
-  rpc Permission (PermissionRequest) returns (PermissionReply) {
-    option (google.api.http) = {
-      post: "/permission"
-      body: "*"
-    };
-  }
+  rpc Permission (PermissionRequest) returns (PermissionReply) {}
   rpc CreateAction (CreateActionRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/action"
@@ -327,8 +322,7 @@ message UpdateUserRequest {
 }
 
 message PermissionRequest {
-  string user_code = 1;
-  string resource = 2;
+  string resource = 1;
 }
 
 message PermissionReply {
