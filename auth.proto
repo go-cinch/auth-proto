@@ -198,11 +198,8 @@ message User {
   string updated_at = 3;
   string username = 4;
   string code = 5;
-  string mobile = 6;
+  string platform = 6;
   uint64 locked = 7;
-  string avatar = 8;
-  string nickname = 9;
-  string introduction = 10;
   string last_login = 11;
   int64 lock_expire = 12;
   string lock_msg = 13;
@@ -228,10 +225,7 @@ message Role {
 message RegisterRequest {
   string username = 1 [(validate.rules).string = {min_len: 5, max_len: 50}];
   string password = 2 [(validate.rules).string = {min_len: 6, max_len: 50}];
-  string mobile = 3;
-  string avatar = 4;
-  string nickname = 5;
-  string introduction = 6;
+  string platform = 3 [(validate.rules).string = {min_len: 1}];
 }
 
 message PwdRequest {
@@ -243,8 +237,9 @@ message PwdRequest {
 message LoginRequest {
   string username = 1 [(validate.rules).string = {min_len: 5, max_len: 50}];
   string password = 2;
-  optional string captcha_id = 3;
-  optional string captcha_answer = 4;
+  optional string platform = 3;
+  optional string captcha_id = 4;
+  optional string captcha_answer = 5;
 }
 
 message LoginReply {
@@ -274,11 +269,8 @@ message InfoReply {
   uint64 id = 1;
   string username = 2;
   string code = 3;
-  string mobile = 4;
-  string avatar = 5;
-  string nickname = 6;
-  string introduction = 7;
-  Permission permission = 8;
+  string platform = 4;
+  Permission permission = 5;
 }
 
 message IdempotentReply {
@@ -299,7 +291,7 @@ message FindUserRequest {
   optional string end_updated_at = 5;
   optional string username = 6;
   optional string code = 7;
-  optional string mobile = 8;
+  optional string platform = 8;
   optional uint64 locked = 9;
 }
 
@@ -312,13 +304,10 @@ message UpdateUserRequest {
   uint64 id = 1;
   optional string username = 2;
   optional string password = 3;
-  optional string mobile = 4;
-  optional string avatar = 5;
-  optional string nickname = 6;
-  optional string introduction = 7;
-  optional uint64 locked = 8;
-  optional string lock_expire_time = 9;
-  optional string action = 10;
+  optional string platform = 4;
+  optional uint64 locked = 5;
+  optional string lock_expire_time = 6;
+  optional string action = 7;
 }
 
 message PermissionRequest {
