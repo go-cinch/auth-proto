@@ -204,6 +204,8 @@ message User {
   int64 lock_expire = 12;
   string lock_msg = 13;
   repeated Action actions = 14;
+  uint64 role_id = 15;
+  Role role = 16;
 }
 
 message UserGroup {
@@ -310,6 +312,7 @@ message UpdateUserRequest {
   optional uint64 locked = 5;
   optional string lock_expire_time = 6;
   optional string action = 7;
+  optional uint64 roleId = 8;
 }
 
 message PermissionRequest {
