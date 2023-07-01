@@ -7,6 +7,7 @@ import "google/protobuf/empty.proto";
 // the validate rules:
 // https://github.com/envoyproxy/protoc-gen-validate
 import "validate/validate.proto";
+import "cinch/params/params.proto";
 
 option go_package = "./api/auth;auth";
 option java_multiple_files = true;
@@ -65,6 +66,8 @@ service Auth {
       get: "/idempotent"
     };
   }
+  rpc CheckIdempotent (CheckIdempotentRequest) returns (google.protobuf.Empty) {}
+  rpc GetUserByCode (GetUserByCodeRequest) returns (GetUserByCodeReply) {}
   rpc FindUser (FindUserRequest) returns (FindUserReply) {
     option (google.api.http) = {
       get: "/user"
@@ -80,12 +83,16 @@ service Auth {
       }
     };
   }
-  rpc DeleteUser (IdsRequest) returns (google.protobuf.Empty) {
+  rpc DeleteUser (params.IdsRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/user/{ids}"
     };
   }
-  rpc Permission (PermissionRequest) returns (PermissionReply) {}
+  rpc Permission (PermissionRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      get: "/permission"
+    };
+  }
   rpc CreateAction (CreateActionRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/action"
@@ -107,7 +114,7 @@ service Auth {
       }
     };
   }
-  rpc DeleteAction (IdsRequest) returns (google.protobuf.Empty) {
+  rpc DeleteAction (params.IdsRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/action/{ids}"
     };
@@ -133,7 +140,7 @@ service Auth {
       }
     };
   }
-  rpc DeleteRole (IdsRequest) returns (google.protobuf.Empty) {
+  rpc DeleteRole (params.IdsRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/role/{ids}"
     };
@@ -159,22 +166,38 @@ service Auth {
       }
     };
   }
-  rpc DeleteUserGroup (IdsRequest) returns (google.protobuf.Empty) {
+  rpc DeleteUserGroup (params.IdsRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/user/group/{ids}"
     };
   }
-}
-
-message Page {
-  uint64 num = 1;
-  uint64 size = 2;
-  int64 total = 3;
-  bool disable = 4;
-}
-
-message IdsRequest {
-  string ids = 1;
+  rpc CreateWhitelist (CreateWhitelistRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/whitelist"
+      body: "*"
+    };
+  }
+  rpc HasWhitelist (HasWhitelistRequest) returns (HasWhitelistReply) {}
+  rpc FindWhitelist (FindWhitelistRequest) returns (FindWhitelistReply) {
+    option (google.api.http) = {
+      get: "/whitelist"
+    };
+  }
+  rpc UpdateWhitelist (UpdateWhitelistRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      put: "/whitelist/{id}"
+      body: "*",
+      additional_bindings {
+        patch: "/whitelist/{id}",
+        body: "*",
+      }
+    };
+  }
+  rpc DeleteWhitelist (params.IdsRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/whitelist/{ids}"
+    };
+  }
 }
 
 message Captcha {
@@ -199,7 +222,7 @@ message User {
   string username = 4;
   string code = 5;
   string platform = 6;
-  uint64 locked = 7;
+  bool locked = 7;
   string last_login = 11;
   int64 lock_expire = 12;
   string lock_msg = 13;
@@ -222,6 +245,12 @@ message Role {
   string word = 3;
   string action = 4;
   repeated Action actions = 5;
+}
+
+message Whitelist {
+  uint64 id = 1;
+  uint32 category = 2;
+  string resource = 3;
 }
 
 message RegisterRequest {
@@ -257,7 +286,7 @@ message StatusRequest {
 
 message StatusReply {
   Captcha captcha = 1;
-  uint64 locked = 2;
+  bool locked = 2;
   int64 lock_expire = 3;
 }
 
@@ -277,6 +306,10 @@ message InfoReply {
   Permission permission = 5;
 }
 
+message CheckIdempotentRequest {
+  string token = 1;
+}
+
 message IdempotentReply {
   string token = 1;
 }
@@ -287,8 +320,16 @@ message Permission {
   repeated string btns = 3;
 }
 
+message GetUserByCodeRequest {
+  string code = 1;
+}
+
+message GetUserByCodeReply {
+  User user = 1;
+}
+
 message FindUserRequest {
-  Page page = 1;
+  params.Page page = 1;
   optional string start_created_at = 2;
   optional string end_created_at = 3;
   optional string start_updated_at = 4;
@@ -296,11 +337,11 @@ message FindUserRequest {
   optional string username = 6;
   optional string code = 7;
   optional string platform = 8;
-  optional uint64 locked = 9;
+  optional bool locked = 9;
 }
 
 message FindUserReply {
-  Page page = 1;
+  params.Page page = 1;
   repeated User list = 2;
 }
 
@@ -309,18 +350,16 @@ message UpdateUserRequest {
   optional string username = 2;
   optional string password = 3;
   optional string platform = 4;
-  optional uint64 locked = 5;
+  optional bool locked = 5;
   optional string lock_expire_time = 6;
   optional string action = 7;
   optional uint64 roleId = 8;
 }
 
 message PermissionRequest {
-  string resource = 1;
-}
-
-message PermissionReply {
-  bool pass = 1;
+  optional string resource = 1;
+  optional string method = 2;
+  optional string uri = 3;
 }
 
 message CreateActionRequest {
@@ -332,7 +371,7 @@ message CreateActionRequest {
 }
 
 message FindActionRequest {
-  Page page = 1;
+  params.Page page = 1;
   optional string code = 2;
   optional string name = 3;
   optional string word = 4;
@@ -340,7 +379,7 @@ message FindActionRequest {
 }
 
 message FindActionReply {
-  Page page = 1;
+  params.Page page = 1;
   repeated Action list = 2;
 }
 
@@ -360,14 +399,14 @@ message CreateRoleRequest {
 }
 
 message FindRoleRequest {
-  Page page = 1;
+  params.Page page = 1;
   optional string name = 2;
   optional string word = 3;
   optional string action = 4;
 }
 
 message FindRoleReply {
-  Page page = 1;
+  params.Page page = 1;
   repeated Role list = 2;
 }
 
@@ -386,14 +425,14 @@ message CreateUserGroupRequest {
 }
 
 message FindUserGroupRequest {
-  Page page = 1;
+  params.Page page = 1;
   optional string name = 2;
   optional string word = 3;
   optional string action = 4;
 }
 
 message FindUserGroupReply {
-  Page page = 1;
+  params.Page page = 1;
   repeated UserGroup list = 2;
 }
 
@@ -403,4 +442,40 @@ message UpdateUserGroupRequest {
   optional string word = 3;
   optional string action = 4;
   optional string users = 5;
+}
+
+message CreateWhitelistRequest {
+  uint32 category = 1;
+  string resource = 2;
+}
+
+message HasWhitelistRequest {
+  uint32 category = 1;
+  message CheckPermission {
+    string resource = 1;
+    string method = 2;
+    string uri = 3;
+  }
+  CheckPermission permission = 2;
+}
+
+message HasWhitelistReply {
+  bool ok = 1;
+}
+
+message FindWhitelistRequest {
+  params.Page page = 1;
+  optional uint32 category = 2;
+  optional string resource = 3;
+}
+
+message FindWhitelistReply {
+  params.Page page = 1;
+  repeated Whitelist list = 2;
+}
+
+message UpdateWhitelistRequest {
+  uint64 id = 1;
+  optional uint32 category = 2;
+  optional string resource = 3;
 }
