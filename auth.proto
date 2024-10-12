@@ -18,7 +18,7 @@ option java_outer_classname = "AuthProtoV1";
 service Auth {
   rpc Register (RegisterRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/register"
+      post: "/pub/register"
       body: "*"
     };
   }
@@ -30,18 +30,18 @@ service Auth {
   }
   rpc Login (LoginRequest) returns (LoginReply) {
     option (google.api.http) = {
-      post: "/login"
+      post: "/pub/login"
       body: "*"
     };
   }
   rpc Status (StatusRequest) returns (StatusReply) {
     option (google.api.http) = {
-      get: "/status"
+      get: "/pub/status"
     };
   }
   rpc Captcha (google.protobuf.Empty) returns (CaptchaReply) {
     option (google.api.http) = {
-      get: "/captcha"
+      get: "/pub/captcha"
     };
   }
   rpc Refresh (RefreshRequest) returns (LoginReply) {
@@ -268,7 +268,7 @@ message PwdRequest {
 }
 
 message LoginRequest {
-  string username = 1 [(validate.rules).string = {min_len: 5, max_len: 50}];
+  string username = 1;
   string password = 2;
   optional string platform = 3;
   optional string captcha_id = 4;
