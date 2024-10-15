@@ -24,7 +24,7 @@ service Auth {
   }
   rpc Pwd (PwdRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/pwd"
+      patch: "/pwd/update"
       body: "*"
     };
   }
@@ -66,26 +66,24 @@ service Auth {
       get: "/idempotent"
     };
   }
-  rpc CheckIdempotent (CheckIdempotentRequest) returns (google.protobuf.Empty) {}
-  rpc GetUserByCode (GetUserByCodeRequest) returns (GetUserByCodeReply) {}
   rpc FindUser (FindUserRequest) returns (FindUserReply) {
     option (google.api.http) = {
-      get: "/user"
+      get: "/user/list"
     };
   }
   rpc UpdateUser (UpdateUserRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      put: "/user/{id}",
+      put: "/user/update",
       body: "*",
       additional_bindings {
-        patch: "/user/{id}",
+        patch: "/user/update",
         body: "*",
       }
     };
   }
   rpc DeleteUser (params.IdsRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/user/{ids}"
+      delete: "/user/delete"
     };
   }
   rpc Permission (PermissionRequest) returns (google.protobuf.Empty) {
@@ -95,107 +93,106 @@ service Auth {
   }
   rpc CreateAction (CreateActionRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/action"
+      post: "/action/create"
       body: "*"
     };
   }
   rpc FindAction (FindActionRequest) returns (FindActionReply) {
     option (google.api.http) = {
-      get: "/action"
+      get: "/action/list"
     };
   }
   rpc UpdateAction (UpdateActionRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      put: "/action/{id}"
+      put: "/action/update"
       body: "*",
       additional_bindings {
-        patch: "/action/{id}",
+        patch: "/action/update",
         body: "*",
       }
     };
   }
   rpc DeleteAction (params.IdsRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/action/{ids}"
+      delete: "/action/delete"
     };
   }
   rpc CreateRole (CreateRoleRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/role"
+      post: "/role/create"
       body: "*"
     };
   }
   rpc FindRole (FindRoleRequest) returns (FindRoleReply) {
     option (google.api.http) = {
-      get: "/role"
+      get: "/role/list"
     };
   }
   rpc UpdateRole (UpdateRoleRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      put: "/role/{id}"
+      put: "/role/update"
       body: "*",
       additional_bindings {
-        patch: "/role/{id}",
+        patch: "/role/update",
         body: "*",
       }
     };
   }
   rpc DeleteRole (params.IdsRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/role/{ids}"
+      delete: "/role/delete"
     };
   }
   rpc CreateUserGroup (CreateUserGroupRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/user/group"
+      post: "/user/group/create"
       body: "*"
     };
   }
   rpc FindUserGroup (FindUserGroupRequest) returns (FindUserGroupReply) {
     option (google.api.http) = {
-      get: "/user/group"
+      get: "/user/group/list"
     };
   }
   rpc UpdateUserGroup (UpdateUserGroupRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      put: "/user/group/{id}"
+      put: "/user/group/update"
       body: "*",
       additional_bindings {
-        patch: "/user/group/{id}",
+        patch: "/user/group/update",
         body: "*",
       }
     };
   }
   rpc DeleteUserGroup (params.IdsRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/user/group/{ids}"
+      delete: "/user/group/delete"
     };
   }
   rpc CreateWhitelist (CreateWhitelistRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/whitelist"
+      post: "/whitelist/create"
       body: "*"
     };
   }
-  rpc HasWhitelist (HasWhitelistRequest) returns (HasWhitelistReply) {}
   rpc FindWhitelist (FindWhitelistRequest) returns (FindWhitelistReply) {
     option (google.api.http) = {
-      get: "/whitelist"
+      get: "/whitelist/list"
     };
   }
   rpc UpdateWhitelist (UpdateWhitelistRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      put: "/whitelist/{id}"
+      put: "/whitelist/update"
       body: "*",
       additional_bindings {
-        patch: "/whitelist/{id}",
+        patch: "/whitelist/update",
         body: "*",
       }
     };
   }
   rpc DeleteWhitelist (params.IdsRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/whitelist/{ids}"
+      delete: "/whitelist/delete"
     };
   }
 }
@@ -281,7 +278,7 @@ message LoginReply {
 }
 
 message StatusRequest {
-  string username = 1 [(validate.rules).string = {min_len: 5, max_len: 50}];
+  string username = 1;
 }
 
 message StatusReply {
@@ -306,10 +303,6 @@ message InfoReply {
   Permission permission = 5;
 }
 
-message CheckIdempotentRequest {
-  string token = 1;
-}
-
 message IdempotentReply {
   string token = 1;
 }
@@ -318,14 +311,6 @@ message Permission {
   repeated string resources = 1;
   repeated string menus = 2;
   repeated string btns = 3;
-}
-
-message GetUserByCodeRequest {
-  string code = 1;
-}
-
-message GetUserByCodeReply {
-  User user = 1;
 }
 
 message FindUserRequest {
@@ -447,20 +432,6 @@ message UpdateUserGroupRequest {
 message CreateWhitelistRequest {
   uint32 category = 1;
   string resource = 2;
-}
-
-message HasWhitelistRequest {
-  uint32 category = 1;
-  message CheckPermission {
-    string resource = 1;
-    string method = 2;
-    string uri = 3;
-  }
-  CheckPermission permission = 2;
-}
-
-message HasWhitelistReply {
-  bool ok = 1;
 }
 
 message FindWhitelistRequest {
