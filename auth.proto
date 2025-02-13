@@ -61,11 +61,6 @@ service Auth {
       get: "/info"
     };
   }
-  rpc Idempotent (google.protobuf.Empty) returns (IdempotentReply) {
-    option (google.api.http) = {
-      get: "/idempotent"
-    };
-  }
   rpc FindUser (FindUserRequest) returns (FindUserReply) {
     option (google.api.http) = {
       get: "/user/list"
@@ -301,10 +296,6 @@ message InfoReply {
   string code = 3;
   string platform = 4;
   Permission permission = 5;
-}
-
-message IdempotentReply {
-  string token = 1;
 }
 
 message Permission {
